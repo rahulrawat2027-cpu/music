@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Musyncc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEFF1;
+    --paper-2:#F7F8F9;
+    --ink:#16202A;
+    --ink-soft:#5A6875;
+    --rule:#CFD5DA;
+    --action:#1F3FBF;
+    --spotify:#1A9C4E;
+    --youtube:#C8302B;
+    --apple:#D8386B;
+    --warn:#8A5A00;
+    --miss:#A03030;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Archivo",system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 96px}
+  a{color:var(--action)}
+
+  header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:14px}
+  h1{font-size:30px;font-weight:700;letter-spacing:-0.02em;margin:0}
+  .sub{color:var(--ink-soft);max-width:54ch;margin:6px 0 0;font-size:14px}
+  .clock{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-soft)}
+
+  h2{font-size:15px;font-weight:600;margin:38px 0 12px;letter-spacing:-0.01em}
+  h2 span{color:var(--ink-soft);font-weight:400}
+
+  /* channels */
+  .channels{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .ch{background:var(--paper-2);border:1px solid var(--rule);border-top:4px solid var(--c);padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px}
+  .ch h3{margin:0;font-size:16px;font-weight:600}
+  .ch .who{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-soft);min-height:18px;word-break:break-all}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rule);margin-right:7px;vertical-align:1px}
+  .ch.on .dot{background:var(--c)}
+  .ch .count{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-soft)}
+
+  button{font-family:inherit;font-size:14px;font-weight:500;border:1px solid var(--ink);background:var(--ink);color:var(--paper-2);padding:7px 13px;cursor:pointer}
+  button:hover{background:#000}
+  button.ghost{background:transparent;color:var(--ink)}
+  button.ghost:hover{background:var(--ink);color:var(--paper-2)}
+  button:disabled{opacity:.4;cursor:not-allowed;background:transparent;color:var(--ink-soft);border-color:var(--rule)}
+  button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--action);outline-offset:2px}
+
+  /* route */
+  .route{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;background:var(--paper-2);border:1px solid var(--rule);padding:16px}
+  label.field{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px}
+  select,input[type=text]{font-family:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--rule);background:#fff;color:var(--ink);width:100%}
+  .targets{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+  .targets label{display:flex;gap:6px;align-items:center;font-size:14px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:12.5px}
+  th{text-align:left;font-family:"Archivo",sans-serif;font-size:12px;font-weight:600;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding:6px 8px}
+  td{padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+  tr td:first-child{color:var(--ink-soft);width:34px}
+  .res{white-space:nowrap}
+  .ok{color:var(--spotify)}
+  .fuzzy{color:var(--warn)}
+  .none{color:var(--miss)}
+  .empty{border:1px dashed var(--rule);padding:28px 16px;text-align:center;color:var(--ink-soft);font-size:14px;background:var(--paper-2)}
+
+  /* log */
+  #log{font-family:"IBM Plex Mono",monospace;font-size:12px;background:var(--ink);color:#C9D4DE;padding:12px;max-height:220px;overflow:auto;white-space:pre-wrap}
+  #log .e{color:#FF9A8B}
+
+  details.setup{margin-top:38px;border-top:1px solid var(--rule);padding-top:14px}
+  details.setup summary{cursor:pointer;font-weight:600;font-size:14px}
+  details.setup .body{font-size:13.5px;color:var(--ink-soft);max-width:72ch}
+  code{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:#fff;border:1px solid var(--rule);padding:1px 4px}
+  .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}
+
+  @media (max-width:760px){
+    .channels{grid-template-columns:1fr}
+    .route{grid-template-columns:1fr}
+    h1{font-size:24px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Musyncc</h1>
+      <p class="sub">Copy a playlist from one service into the others. Every track is matched before anything is written, and you see the matches first.</p>
+    </div>
+    <div class="clock" id="clock">not connected</div>
+  </header>
+
+  <h2>Accounts</h2>
+  <div class="channels">
+    <div class="ch" id="ch-spotify" style="--c:var(--spotify)">
+      <h3><span class="dot"></span>Spotify</h3>
+      <div class="who" id="who-spotify">Signed out</div>
+      <div class="count" id="count-spotify"></div>
+      <div class="actions"><button class="ghost" id="btn-spotify">Connect</button></div>
+    </div>
+    <div class="ch" id="ch-youtube" style="--c:var(--youtube)">
+      <h3><span class="dot"></span>YouTube</h3>
+      <div class="who" id="who-youtube">Signed out</div>
+      <div class="count" id="count-youtube"></div>
+      <div class="actions"><button class="ghost" id="btn-youtube">Connect</button></div>
+    </div>
+    <div class="ch" id="ch-apple" style="--c:var(--apple)">
+      <h3><span class="dot"></span>Apple Music</h3>
+      <div class="who" id="who-apple">Signed out</div>
+      <div class="count" id="count-apple"></div>
+      <div class="actions"><button class="ghost" id="btn-apple">Connect</button></div>
+    </div>
+  </div>
+
+  <h2>Route <span>— pick what to copy, and where it lands</span></h2>
+  <div class="route">
+    <div>
+      <label class="field" for="source">Playlist to copy</label>
+      <select id="source"><option value="">Connect an account first</option></select>
+      <div class="targets" id="targets">
+        <label><input type="checkbox" value="spotify"> Spotify</label>
+        <label><input type="checkbox" value="youtube"> YouTube</label>
+        <label><input type="checkbox" value="apple"> Apple Music</label>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="ghost" id="btn-preview" disabled>Find matches</button>
+      <button id="btn-run" disabled>Copy tracks</button>
+    </div>
+  </div>
+
+  <h2>Matches</h2>
+  <div id="table-host">
+    <div class="empty">Nothing matched yet. Choose a playlist and select where it should go.</div>
+  </div>
+
+  <h2>Activity</h2>
+  <div id="log">ready.</div>
+
+  <details class="setup">
+    <summary>Setup and keys</summary>
+    <div class="body">
+      <p>Everything runs in your browser. Tokens stay in this tab and in <code>localStorage</code>; nothing is sent to a server of mine. Deploy by dropping this file at the root of a repo and importing it into Vercel as a static project.</p>
+      <div class="keys">
+        <div>
+          <label class="field" for="k-spotify">Spotify client ID</label>
+          <input type="text" id="k-spotify" placeholder="from developer.spotify.com">
+        </div>
+        <div>
+          <label class="field" for="k-google">Google OAuth client ID</label>
+          <input type="text" id="k-google" placeholder="…apps.googleusercontent.com">
+        </div>
+        <div>
+          <label class="field" for="k-apple">Apple developer token</label>
+          <input type="text" id="k-apple" placeholder="signed ES256 JWT">
+        </div>
+      </div>
+      <div class="actions"><button class="ghost" id="btn-save">Save keys</button></div>
+      <p>Redirect URI to register with Spotify, and the authorised origin for Google: <code id="origin"></code></p>
+      <p>The Apple token has to be signed with your <code>.p8</code> private key, which can't be done safely in a browser — generate it offline and paste it here. It lasts up to six months.</p>
+      <p>YouTube's API charges 100 quota units per search and 50 per track added, against a default daily budget of 10,000. A 60-track playlist costs roughly 9,000, so expect to sync about one playlist a day until you request more.</p>
+    </div>
+  </details>
+
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" data-web-components async></script>
+<script>
+/* ------------------------------------------------------------------ *
+ * Musyncc — single-file, client-side playlist copier.
+ * Spotify: Authorization Code + PKCE.  YouTube: Google Identity token.
+ * Apple Music: MusicKit v3 with a pre-signed developer token.
+ * ------------------------------------------------------------------ */
+
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return mem[k] ?? null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){ mem[k]=v; } },
+  del(k){ try { localStorage.removeItem(k); } catch(e){ delete mem[k]; } }
+};
+const mem = {};
+
+const KEYS = {
+  spotifyClientId: store.get('pb.spotifyClientId') || '',
+  googleClientId:  store.get('pb.googleClientId')  || '',
+  appleDevToken:   store.get('pb.appleDevToken')   || ''
+};
+
+const REDIRECT = location.origin + location.pathname;
+const state = { playlists: [], matches: null, source: null };
+
+const $ = s => document.querySelector(s);
+function log(msg, isErr){
+  const el = $('#log');
+  const line = document.createElement('div');
+  if (isErr) line.className = 'e';
+  line.textContent = new Date().toLocaleTimeString() + '  ' + msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+/* ---------------------------- matching ---------------------------- */
+
+const NOISE = /\s*[\(\[][^\)\]]*(remaster|remastered|live|version|edit|mix|mono|stereo|deluxe|bonus|explicit|feat\.?|ft\.?|with )[^\)\]]*[\)\]]/gi;
+
+function normTitle(t){
+  return (t||'')
+    .replace(NOISE,'')
+    .replace(/\s+-\s+(remaster|remastered|live|radio edit|single version).*$/i,'')
+    .replace(/[^\p{L}\p{N}\s]/gu,' ')
+    .replace(/\s+/g,' ')
+    .trim()
+    .toLowerCase();
+}
+function normArtist(a){
+  return (a||'').split(/,|&|feat\.?|ft\.?|\sand\s/i)[0]
+    .replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim().toLowerCase();
+}
+// crude but adequate: token overlap
+function similar(a,b){
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  const A = new Set(a.split(' ')), B = new Set(b.split(' '));
+  let hit = 0; A.forEach(t => { if (B.has(t)) hit++; });
+  return (2*hit) / (A.size + B.size);
+}
+function scoreCandidate(src, cand){
+  const t = similar(normTitle(src.title), normTitle(cand.title));
+  const a = similar(normArtist(src.artist), normArtist(cand.artist));
+  let s = t*0.65 + a*0.35;
+  if (src.durationMs && cand.durationMs){
+    const d = Math.abs(src.durationMs - cand.durationMs);
+    if (d < 4000) s += 0.08; else if (d > 20000) s -= 0.25;
+  }
+  return Math.max(0, Math.min(1, s));
+}
+
+/* ---------------------------- spotify ----------------------------- */
+
+const spotify = {
+  id:'spotify', label:'Spotify', token:null, user:null,
+
+  async connect(){
+    if (!KEYS.spotifyClientId) throw new Error('Add your Spotify client ID under Setup.');
+    const verifier = [...crypto.getRandomValues(new Uint8Array(48))]
+      .map(b => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'[b % 66]).join('');
+    store.set('pb.sp.verifier', verifier);
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+    const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const p = new URLSearchParams({
+      client_id: KEYS.spotifyClientId,
+      response_type: 'code',
+      redirect_uri: REDIRECT,
+      code_challenge_method: 'S256',
+      code_challenge: challenge,
+      scope: 'playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public'
+    });
+    location.href = 'https://accounts.spotify.com/authorize?' + p;
+  },
+
+  async finishRedirect(code){
+    const verifier = store.get('pb.sp.verifier');
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({
+        client_id: KEYS.spotifyClientId, grant_type:'authorization_code',
+        code, redirect_uri: REDIRECT, code_verifier: verifier
+      })
+    });
+    if (!r.ok) throw new Error('Spotify rejected the token exchange: ' + await r.text());
+    const j = await r.json();
+    this.token = j.access_token;
+    store.set('pb.sp.token', j.access_token);
+    store.set('pb.sp.expires', String(Date.now() + j.expires_in*1000));
+    if (j.refresh_token) store.set('pb.sp.refresh', j.refresh_token);
+  },
+
+  restore(){
+    const t = store.get('pb.sp.token'), exp = Number(store.get('pb.sp.expires')||0);
+    if (t && Date.now() < exp - 30000){ this.token = t; return true; }
+    return false;
+  },
+
+  async api(path, opts={}){
+    const r = await fetch('https://api.spotify.com/v1' + path, {
+      ...opts,
+      headers:{ Authorization:'Bearer ' + this.token, 'Content-Type':'application/json', ...(opts.headers||{}) }
+    });
+    if (r.status === 401){ this.token = null; throw new Error('Spotify session expired — connect again.'); }
+    if (!r.ok) throw new Error('Spotify ' + r.status + ': ' + await r.text());
+    return r.status === 204 ? null : r.json();
+  },
+
+  async me(){ const u = await this.api('/me'); this.user = u; return u.display_name || u.id; },
+
+  async playlists(){
+    const out = []; let url = '/me/playlists?limit=50';
+    while (url){
+      const j = await this.api(url);
+      j.items.forEach(p => out.push({ service:'spotify', id:p.id, name:p.name, count:p.tracks.total, owner:p.owner.display_name }));
+      url = j.next ? j.next.replace('https://api.spotify.com/v1','') : null;
+    }
+    return out;
+  },
+
+  async tracks(id){
+    const out = []; let url = `/playlists/${id}/tracks?limit=100`;
+    while (url){
+      const j = await this.api(url);
+      for (const it of j.items){
+        const t = it.track;
+        if (!t || t.is_local || t.type !== 'track') continue;
+        out.push({
+          title:t.name, artist:(t.artists||[]).map(a=>a.name).join(', '),
+          album:t.album && t.album.name, isrc:t.external_ids && t.external_ids.isrc,
+          durationMs:t.duration_ms, nativeId:t.uri
+        });
+      }
+      url = j.next ? j.next.replace('https://api.spotify.com/v1','') : null;
+    }
+    return out;
+  },
+
+  async find(track){
+    if (track.isrc){
+      const j = await this.api('/search?type=track&limit=1&q=' + encodeURIComponent('isrc:' + track.isrc));
+      const hit = j.tracks.items[0];
+      if (hit) return { id:hit.uri, title:hit.name, artist:hit.artists.map(a=>a.name).join(', '), confidence:1 };
+    }
+    const q = `track:${track.title} artist:${normArtist(track.artist)}`;
+    const j = await this.api('/search?type=track&limit=5&q=' + encodeURIComponent(q));
+    let best = null;
+    for (const hit of j.tracks.items){
+      const cand = { id:hit.uri, title:hit.name, artist:hit.artists.map(a=>a.name).join(', '), durationMs:hit.duration_ms };
+      const s = scoreCandidate(track, cand);
+      if (!best || s > best.confidence) best = { ...cand, confidence:s };
+    }
+    return best;
+  },
+
+  async createPlaylist(name){
+    const p = await this.api(`/users/${this.user.id}/playlists`, {
+      method:'POST', body: JSON.stringify({ name, public:false, description:'Copied with Musyncc' })
+    });
+    return p.id;
+  },
+
+  async add(playlistId, ids){
+    for (let i=0;i<ids.length;i+=100){
+      await this.api(`/playlists/${playlistId}/tracks`, { method:'POST', body: JSON.stringify({ uris: ids.slice(i,i+100) }) });
+    }
+  }
+};
+
+/* ---------------------------- youtube ----------------------------- */
+
+const youtube = {
+  id:'youtube', label:'YouTube', token:null, user:null, _client:null,
+
+  connect(){
+    if (!KEYS.googleClientId) throw new Error('Add your Google OAuth client ID under Setup.');
+    if (!window.google || !google.accounts) throw new Error('Google sign-in script has not loaded yet.');
+    return new Promise((resolve, reject) => {
+      this._client = google.accounts.oauth2.initTokenClient({
+        client_id: KEYS.googleClientId,
+        scope: 'https://www.googleapis.com/auth/youtube',
+        callback: (res) => {
+          if (res.error) return reject(new Error('Google: ' + res.error));
+          this.token = res.access_token;
+          store.set('pb.yt.token', res.access_token);
+          store.set('pb.yt.expires', String(Date.now() + (res.expires_in||3500)*1000));
+          resolve();
+        }
+      });
+      this._client.requestAccessToken();
+    });
+  },
+
+  restore(){
+    const t = store.get('pb.yt.token'), exp = Number(store.get('pb.yt.expires')||0);
+    if (t && Date.now() < exp - 30000){ this.token = t; return true; }
+    return false;
+  },
+
+  async api(path, opts={}){
+    const r = await fetch('https://www.googleapis.com/youtube/v3' + path, {
+      ...opts,
+      headers:{ Authorization:'Bearer ' + this.token, 'Content-Type':'application/json', ...(opts.headers||{}) }
+    });
+    if (r.status === 401){ this.token = null; throw new Error('YouTube session expired — connect again.'); }
+    if (!r.ok) throw new Error('YouTube ' + r.status + ': ' + await r.text());
+    return r.json();
+  },
+
+  async me(){
+    const j = await this.api('/channels?part=snippet&mine=true');
+    this.user = j.items && j.items[0];
+    return this.user ? this.user.snippet.title : 'signed in';
+  },
+
+  async playlists(){
+    const out = []; let page = '';
+    do {
+      const j = await this.api('/playlists?part=snippet,contentDetails&mine=true&maxResults=50' + (page ? '&pageToken='+page : ''));
+      j.items.forEach(p => out.push({ service:'youtube', id:p.id, name:p.snippet.title, count:p.contentDetails.itemCount }));
+      page = j.nextPageToken;
+    } while (page);
+    return out;
+  },
+
+  async tracks(id){
+    const out = []; let page = '';
+    do {
+      const j = await this.api(`/playlistItems?part=snippet&playlistId=${id}&maxResults=50` + (page ? '&pageToken='+page : ''));
+      for (const it of j.items){
+        const s = it.snippet;
+        if (!s || s.title === 'Deleted video' || s.title === 'Private video') continue;
+        // "Artist - Title" is the usual shape; videoOwnerChannelTitle is the fallback artist.
+        const parts = s.title.split(' - ');
+        const hasDash = parts.length > 1;
+        out.push({
+          title: hasDash ? parts.slice(1).join(' - ') : s.title,
+          artist: hasDash ? parts[0] : (s.videoOwnerChannelTitle||'').replace(/ - Topic$/,''),
+          isrc: null, durationMs: null, nativeId: s.resourceId.videoId
+        });
+      }
+      page = j.nextPageToken;
+    } while (page);
+    return out;
+  },
+
+  async find(track){
+    const q = `${track.artist} ${track.title}`;
+    const j = await this.api('/search?part=snippet&type=video&videoCategoryId=10&maxResults=5&q=' + encodeURIComponent(q));
+    let best = null;
+    for (const it of (j.items||[])){
+      const title = it.snippet.title;
+      const parts = title.split(' - ');
+      const cand = {
+        id: it.id.videoId,
+        title: parts.length > 1 ? parts.slice(1).join(' - ') : title,
+        artist: parts.length > 1 ? parts[0] : it.snippet.channelTitle.replace(/ - Topic$/,'')
+      };
+      const s = scoreCandidate(track, cand);
+      if (!best || s > best.confidence) best = { ...cand, confidence:s };
+    }
+    return best;
+  },
+
+  async createPlaylist(name){
+    const j = await this.api('/playlists?part=snippet,status', {
+      method:'POST',
+      body: JSON.stringify({ snippet:{ title:name, description:'Copied with Musyncc' }, status:{ privacyStatus:'private' } })
+    });
+    return j.id;
+  },
+
+  async add(playlistId, ids){
+    for (const videoId of ids){
+      await this.api('/playlistItems?part=snippet', {
+        method:'POST',
+        body: JSON.stringify({ snippet:{ playlistId, resourceId:{ kind:'youtube#video', videoId } } })
+      });
+    }
+  }
+};
+
+/* -------------------------- apple music --------------------------- */
+
+const apple = {
+  id:'apple', label:'Apple Music', music:null, storefront:'us',
+
+  async connect(){
+    if (!KEYS.appleDevToken) throw new Error('Paste your Apple developer token under Setup.');
+    if (!window.MusicKit) throw new Error('MusicKit has not loaded yet.');
+    this.music = await MusicKit.configure({
+      developerToken: KEYS.appleDevToken,
+      app:{ name:'Musyncc', build:'1.0' }
+    });
+    await this.music.authorize();
+    try {
+      const sf = await this.music.api.music('/v1/me/storefront');
+      this.storefront = sf.data.data[0].id;
+    } catch(e){ /* keep default */ }
+  },
+
+  restore(){ return false; },              // MusicKit re-authorises on demand
+  get token(){ return this.music && this.music.musicUserToken; },
+  async me(){ return 'Signed in (' + this.storefront.toUpperCase() + ')'; },
+
+  async req(path, params){
+    const r = await this.music.api.music(path, params);
+    return r.data;
+  },
+
+  async playlists(){
+    const out = []; let path = '/v1/me/library/playlists?limit=100';
+    while (path){
+      const j = await this.req(path);
+      (j.data||[]).forEach(p => out.push({
+        service:'apple', id:p.id, name:p.attributes.name,
+        count:(p.attributes.trackCount ?? '?')
+      }));
+      path = j.next || null;
+    }
+    return out;
+  },
+
+  async tracks(id){
+    const out = []; let path = `/v1/me/library/playlists/${id}/tracks?limit=100`;
+    while (path){
+      let j;
+      try { j = await this.req(path); }
+      catch(e){ break; }                    // empty playlists 404 here
+      for (const t of (j.data||[])){
+        const a = t.attributes || {};
+        out.push({
+          title:a.name, artist:a.artistName, album:a.albumName,
+          isrc:a.isrc || null, durationMs:a.durationInMillis || null,
+          nativeId: (a.playParams && a.playParams.catalogId) || t.id
+        });
+      }
+      path = j.next || null;
+    }
+    return out;
+  },
+
+  async find(track){
+    if (track.isrc){
+      try {
+        const j = await this.req(`/v1/catalog/${this.storefront}/songs?filter[isrc]=${track.isrc}`);
+        const hit = (j.data||[])[0];
+        if (hit) return { id:hit.id, title:hit.attributes.name, artist:hit.attributes.artistName, confidence:1 };
+      } catch(e){ /* fall through to text search */ }
+    }
+    const term = `${track.artist} ${track.title}`;
+    const j = await this.req(`/v1/catalog/${this.storefront}/search`, { term, types:'songs', limit:5 });
+    const items = (j.results && j.results.songs && j.results.songs.data) || [];
+    let best = null;
+    for (const hit of items){
+      const cand = { id:hit.id, title:hit.attributes.name, artist:hit.attributes.artistName, durationMs:hit.attributes.durationInMillis };
+      const s = scoreCandidate(track, cand);
+      if (!best || s > best.confidence) best = { ...cand, confidence:s };
+    }
+    return best;
+  },
+
+  async createPlaylist(name, ids){
+    const body = { attributes:{ name, description:'Copied with Musyncc' } };
+    if (ids && ids.length) body.relationships = { tracks:{ data: ids.map(id => ({ id, type:'songs' })) } };
+    const j = await this.music.api.music('/v1/me/library/playlists', {}, { fetchOptions:{ method:'POST', body: JSON.stringify(body) } });
+    return j.data.data[0].id;
+  },
+
+  async add(playlistId, ids){
+    await this.music.api.music(`/v1/me/library/playlists/${playlistId}/tracks`, {}, {
+      fetchOptions:{ method:'POST', body: JSON.stringify({ data: ids.map(id => ({ id, type:'songs' })) }) }
+    });
+  }
+};
+
+const SERVICES = { spotify, youtube, apple };
+
+/* ------------------------------ ui -------------------------------- */
+
+function setConnected(key, who, ok){
+  const ch = $('#ch-' + key);
+  ch.classList.toggle('on', !!ok);
+  $('#who-' + key).textContent = ok ? who : 'Signed out';
+  $('#btn-' + key).textContent = ok ? 'Reconnect' : 'Connect';
+  const n = Object.values(SERVICES).filter(s => s.token).length;
+  $('#clock').textContent = n ? n + ' of 3 connected' : 'not connected';
+}
+
+async function loadPlaylists(key){
+  const svc = SERVICES[key];
+  const lists = await svc.playlists();
+  state.playlists = state.playlists.filter(p => p.service !== key).concat(lists);
+  $('#count-' + key).textContent = lists.length + ' playlists';
+  renderSourceOptions();
+  log(`${svc.label}: found ${lists.length} playlists.`);
+}
+
+function renderSourceOptions(){
+  const sel = $('#source');
+  sel.innerHTML = '';
+  if (!state.playlists.length){
+    sel.innerHTML = '<option value="">Connect an account first</option>';
+    return;
+  }
+  for (const p of state.playlists){
+    const o = document.createElement('option');
+    o.value = p.service + '|' + p.id;
+    o.textContent = `${SERVICES[p.service].label} · ${p.name} (${p.count})`;
+    sel.appendChild(o);
+  }
+  $('#btn-preview').disabled = false;
+}
+
+function selectedTargets(){
+  return [...document.querySelectorAll('#targets input:checked')].map(i => i.value);
+}
+
+function renderMatches(){
+  const host = $('#table-host');
+  if (!state.matches || !state.matches.length){
+    host.innerHTML = '<div class="empty">Nothing matched yet. Choose a playlist and select where it should go.</div>';
+    return;
+  }
+  const targets = state.targetList;
+  const rows = state.matches.map((m,i) => {
+    const cells = targets.map(t => {
+      const r = m.results[t];
+      if (!r) return '<td class="res none">no match</td>';
+      const cls = r.confidence >= 0.9 ? 'ok' : (r.confidence >= 0.62 ? 'fuzzy' : 'none');
+      const label = cls === 'none'
+        ? 'too weak'
+        : `${Math.round(r.confidence*100)}% · ${r.title} — ${r.artist}`;
+      return `<td class="res ${cls}">${escapeHtml(label)}</td>`;
+    }).join('');
+    return `<tr><td>${i+1}</td><td>${escapeHtml(m.track.title)}<br><span style="color:var(--ink-soft)">${escapeHtml(m.track.artist)}</span></td>${cells}</tr>`;
+  }).join('');
+  host.innerHTML = `<table><thead><tr><th></th><th>Track</th>${
+    targets.map(t => `<th>${SERVICES[t].label}</th>`).join('')
+  }</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function preview(){
+  const [svcKey, id] = $('#source').value.split('|');
+  const targets = selectedTargets().filter(t => t !== svcKey && SERVICES[t].token);
+  if (!targets.length){ log('Pick at least one connected destination that is not the source.', true); return; }
+
+  const meta = state.playlists.find(p => p.service === svcKey && p.id === id);
+  state.source = { ...meta };
+  state.targetList = targets;
+
+  $('#btn-preview').disabled = true; $('#btn-run').disabled = true;
+  log(`Reading "${meta.name}" from ${SERVICES[svcKey].label}…`);
+  try {
+    const tracks = await SERVICES[svcKey].tracks(id);
+    log(`${tracks.length} tracks. Searching ${targets.map(t=>SERVICES[t].label).join(' and ')}…`);
+    const matches = [];
+    for (const track of tracks){
+      const results = {};
+      for (const t of targets){
+        try { results[t] = await SERVICES[t].find(track); }
+        catch(e){ results[t] = null; log(`${SERVICES[t].label} search failed for "${track.title}": ${e.message}`, true); }
+      }
+      matches.push({ track, results });
+      state.matches = matches;
+      renderMatches();
+    }
+    const good = matches.filter(m => targets.some(t => m.results[t] && m.results[t].confidence >= 0.62)).length;
+    log(`Done. ${good} of ${matches.length} tracks have a usable match.`);
+    $('#btn-run').disabled = good === 0;
+  } catch(e){
+    log(e.message, true);
+  } finally {
+    $('#btn-preview').disabled = false;
+  }
+}
+
+async function run(){
+  if (!state.matches) return;
+  $('#btn-run').disabled = true;
+  for (const t of state.targetList){
+    const svc = SERVICES[t];
+    const ids = state.matches
+      .map(m => m.results[t])
+      .filter(r => r && r.confidence >= 0.62)
+      .map(r => r.id);
+    if (!ids.length){ log(`${svc.label}: nothing to add.`, true); continue; }
+    try {
+      log(`${svc.label}: creating "${state.source.name}" with ${ids.length} tracks…`);
+      if (t === 'apple'){
+        await svc.createPlaylist(state.source.name, ids);
+      } else {
+        const pid = await svc.createPlaylist(state.source.name);
+        await svc.add(pid, ids);
+      }
+      log(`${svc.label}: done.`);
+    } catch(e){ log(`${svc.label}: ${e.message}`, true); }
+  }
+  $('#btn-run').disabled = false;
+}
+
+/* ----------------------------- wiring ----------------------------- */
+
+async function connect(key){
+  const svc = SERVICES[key];
+  try {
+    await svc.connect();
+    if (key !== 'spotify'){                 // spotify returns via redirect
+      setConnected(key, await svc.me(), true);
+      await loadPlaylists(key);
+    }
+  } catch(e){ log(e.message, true); }
+}
+
+['spotify','youtube','apple'].forEach(k => {
+  $('#btn-' + k).addEventListener('click', () => connect(k));
+});
+$('#btn-preview').addEventListener('click', preview);
+$('#btn-run').addEventListener('click', run);
+$('#source').addEventListener('change', () => { state.matches = null; renderMatches(); $('#btn-run').disabled = true; });
+
+$('#btn-save').addEventListener('click', () => {
+  KEYS.spotifyClientId = $('#k-spotify').value.trim();
+  KEYS.googleClientId  = $('#k-google').value.trim();
+  KEYS.appleDevToken   = $('#k-apple').value.trim();
+  store.set('pb.spotifyClientId', KEYS.spotifyClientId);
+  store.set('pb.googleClientId',  KEYS.googleClientId);
+  store.set('pb.appleDevToken',   KEYS.appleDevToken);
+  log('Keys saved to this browser.');
+});
+
+(async function init(){
+  $('#origin').textContent = REDIRECT;
+  $('#k-spotify').value = KEYS.spotifyClientId;
+  $('#k-google').value  = KEYS.googleClientId;
+  $('#k-apple').value   = KEYS.appleDevToken;
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('code')){
+    try {
+      await spotify.finishRedirect(params.get('code'));
+      history.replaceState({}, '', REDIRECT);
+      log('Spotify connected.');
+    } catch(e){ log(e.message, true); }
+  } else if (params.get('error')){
+    log('Spotify sign-in was cancelled.', true);
+    history.replaceState({}, '', REDIRECT);
+  }
+
+  for (const key of ['spotify','youtube']){
+    const svc = SERVICES[key];
+    if (svc.token || svc.restore()){
+      try {
+        setConnected(key, await svc.me(), true);
+        await loadPlaylists(key);
+      } catch(e){ log(e.message, true); setConnected(key, '', false); }
+    }
+  }
+})();
+</script>
+</body>
+</html>
