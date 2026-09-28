@@ -92,12 +92,119 @@
   code{font-family:monospace;font-size:12.5px;background:var(--bg-3);border:1px solid var(--rule-strong);border-radius:4px;padding:1px 4px;color:var(--ink)}
   .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}
 
+  /* ---------------- motion & polish ---------------- */
+  html{scroll-behavior:smooth;scroll-padding-top:20px}
+  body::before{
+    content:"";position:fixed;inset:0 0 auto 0;height:78vh;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(46% 58% at 20% 6%, rgba(79,174,114,.16), transparent 70%),
+      radial-gradient(44% 54% at 80% 2%, rgba(217,112,95,.14), transparent 70%),
+      radial-gradient(50% 60% at 50% 26%, rgba(63,191,166,.12), transparent 72%);
+  }
+  .wrap{position:relative;z-index:1}
+  header.top{animation:fadeUp .7s cubic-bezier(.22,.68,.32,1) both}
+
+  .mark{position:relative;display:inline-grid;place-items:center}
+  .mark::after{content:"";position:absolute;inset:-12px;border-radius:50%;background:radial-gradient(circle,rgba(63,191,166,.35),transparent 70%);filter:blur(7px);animation:breathe 5.5s ease-in-out infinite;pointer-events:none}
+  .mark svg circle{transform-box:fill-box;transform-origin:center}
+  .mark svg .c1{animation:drift1 9s ease-in-out infinite}
+  .mark svg .c2{animation:drift2 9s ease-in-out infinite .9s}
+  .mark svg .c3{animation:drift3 9s ease-in-out infinite 1.8s}
+
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.22,.68,.32,1),transform .6s cubic-bezier(.22,.68,.32,1)}
+  .reveal.in{opacity:1;transform:none}
+  .channels.in .ch{animation:fadeUp .55s cubic-bezier(.22,.68,.32,1) both}
+  .channels.in .ch:nth-child(2){animation-delay:.1s}
+  .channels.in .ch:nth-child(3){animation-delay:.2s}
+
+  .ch{transition:transform .22s cubic-bezier(.22,.68,.32,1),box-shadow .25s ease,border-color .25s ease,background .25s ease}
+  .ch:hover{transform:translateY(-3px);box-shadow:0 18px 34px -24px rgba(0,0,0,.95)}
+  .ch.on{border-color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,var(--rule))}
+  .ch.on h3{color:color-mix(in srgb,var(--c) 65%,var(--ink))}
+  .ch h3{transition:color .25s ease}
+  .dot{position:relative}
+  .ch.on .dot::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:1px solid var(--c);animation:ring 2.4s ease-out infinite;opacity:0}
+
+  button{transition:background .18s ease,border-color .18s ease,color .18s ease,transform .12s cubic-bezier(.22,.68,.32,1),box-shadow .2s ease,opacity .18s ease}
+  button:hover:not(:disabled){transform:translateY(-1px)}
+  button:active:not(:disabled){transform:translateY(0) scale(.98)}
+  button:not(.ghost):not(:disabled){box-shadow:0 10px 24px -14px rgba(63,191,166,.9)}
+  button:not(.ghost):hover:not(:disabled){background:#55CDB4;box-shadow:0 14px 28px -12px rgba(63,191,166,.85)}
+  button.danger{background:transparent;color:var(--miss);border-color:var(--miss)}
+  button.danger:hover{background:rgba(217,97,79,.12);color:#F0907F}
+  button.busy::before{content:"";display:inline-block;width:11px;height:11px;margin-right:7px;vertical-align:-1px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+
+  select,input[type=text]{transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+  select:hover,input[type=text]:hover{border-color:var(--ink-faint)}
+  select:focus-visible,input[type=text]:focus-visible{border-color:var(--action);box-shadow:0 0 0 3px rgba(63,191,166,.18)}
+  select{appearance:none;-webkit-appearance:none;padding-right:30px;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5 6 8.5 10 4.5' fill='none' stroke='%239E9AAD' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+  option{background:var(--bg-3);color:var(--ink)}
+
+  .targets label{position:relative;display:flex;gap:7px;align-items:center;padding:6px 13px;border:1px solid var(--rule-strong);border-radius:999px;background:var(--bg-3);cursor:pointer;font-size:13.5px;user-select:none;transition:transform .16s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+  .targets label::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rule-strong);transition:background .2s ease,box-shadow .2s ease,transform .2s ease}
+  .targets label:hover{transform:translateY(-1px);border-color:var(--ink-faint)}
+  .targets label.on{border-color:var(--tc,var(--action));border-color:color-mix(in srgb,var(--tc,var(--action)) 55%,var(--rule));background:var(--bg-2);background:color-mix(in srgb,var(--tc,var(--action)) 13%,transparent)}
+  .targets label.on::before{background:var(--tc,var(--action));box-shadow:0 0 9px var(--tc,var(--action));transform:scale(1.18)}
+  .targets label:has(input:focus-visible){outline:2px solid var(--action);outline-offset:2px}
+  .targets input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+
+  .thresh{display:flex;align-items:center;gap:10px;margin-top:13px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap}
+  .thresh input[type=range]{flex:1;min-width:110px;max-width:200px;height:4px;accent-color:var(--action);cursor:pointer}
+  .thresh output{min-width:40px;text-align:right;color:var(--action);font-weight:600;font-variant-numeric:tabular-nums}
+
+  #progress{grid-column:1/-1;display:none;align-items:center;gap:12px;font-size:12px;color:var(--ink-soft)}
+  #progress.show{display:flex;animation:fadeUp .35s ease both}
+  #progress .txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+  #progress .track{flex:1;height:6px;border-radius:99px;background:var(--bg-3);border:1px solid var(--rule);overflow:hidden}
+  #progress .bar{position:relative;display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--action),#79E2CE);transition:width .4s cubic-bezier(.22,.68,.32,1)}
+  #progress .bar::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);transform:translateX(-100%);animation:shimmer 1.5s linear infinite}
+
+  thead th{position:sticky;top:0;background:var(--bg);z-index:1}
+  tbody tr{transition:background .18s ease}
+  tbody tr:hover td{background:rgba(255,255,255,.025)}
+  .tt span{color:var(--ink-soft);font-size:12px}
+  .res{white-space:normal;word-break:break-word;animation:cellIn .4s cubic-bezier(.22,.68,.32,1) both}
+  .res .pct{font-weight:600;font-variant-numeric:tabular-nums}
+  .meter{display:block;height:4px;margin-top:5px;border-radius:99px;background:var(--bg-3);overflow:hidden}
+  .meter i{display:block;height:100%;width:var(--w,0%);border-radius:99px;animation:meterGrow .7s cubic-bezier(.22,.68,.32,1) both}
+  .res.ok .meter i{background:linear-gradient(90deg,#4FAE72,#7BD9A0)}
+  .res.fuzzy .meter i{background:linear-gradient(90deg,#E3A23C,#F0C274)}
+  .res.none .meter i{background:linear-gradient(90deg,#D9614F,#E88A7B)}
+  .res.pending{color:var(--ink-faint);font-style:italic;animation:softPulse 1.3s ease-in-out infinite}
+
+  .empty{animation:fadeUp .5s ease both}
+  .empty::before{content:"◍";display:block;font-size:26px;line-height:1;color:var(--ink-faint);margin-bottom:8px;animation:breathe 3.4s ease-in-out infinite}
+
+  #log{scrollbar-width:thin}
+  #log > div{animation:fadeUp .32s ease both}
+  #log a{color:var(--action);text-decoration:underline;text-underline-offset:2px}
+  details.setup summary{transition:color .2s ease}
+  details.setup summary:hover{color:var(--action)}
+  details.setup[open] .body{animation:fadeUp .4s ease both}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes cellIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  @keyframes meterGrow{from{width:0}to{width:var(--w)}}
+  @keyframes shimmer{to{transform:translateX(100%)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes breathe{0%,100%{transform:scale(.9);opacity:.55}50%{transform:scale(1.08);opacity:1}}
+  @keyframes ring{0%{transform:scale(1);opacity:.75}70%,100%{transform:scale(2.7);opacity:0}}
+  @keyframes softPulse{0%,100%{opacity:.5}50%{opacity:1}}
+  @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(1.5px,-2px)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-2px,1.5px)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(1px,2.5px)}}
+
   @media (max-width:760px){
     .channels{grid-template-columns:1fr}
     .route{grid-template-columns:1fr}
     h1{font-size:24px}
   }
-  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+    .reveal{opacity:1!important;transform:none!important}
+    .meter i{width:var(--w)!important}
+    html{scroll-behavior:auto}
+  }
 </style>
 </head>
 <body>
@@ -106,12 +213,14 @@
   <header class="top">
     <div>
       <div style="display:flex;align-items:center;justify-content:center;gap:10px">
+        <span class="mark">
         <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true">
-          <circle cx="18" cy="18" r="12" fill="var(--spotify)" opacity="0.75"/>
-          <circle cx="30" cy="18" r="12" fill="var(--youtube)" opacity="0.75"/>
-          <circle cx="24" cy="30" r="12" fill="var(--apple)" opacity="0.75"/>
+          <circle class="c1" cx="18" cy="18" r="12" fill="var(--spotify)" opacity="0.75"/>
+          <circle class="c2" cx="30" cy="18" r="12" fill="var(--youtube)" opacity="0.75"/>
+          <circle class="c3" cx="24" cy="30" r="12" fill="var(--apple)" opacity="0.75"/>
           <circle cx="24" cy="22" r="5" fill="var(--action)"/>
         </svg>
+        </span>
         <h1>Musyncc</h1>
       </div>
       <p class="sub">Copy a playlist from one service into the others. Every track is matched before anything is written, and you see the matches first.</p>
@@ -147,14 +256,23 @@
       <label class="field" for="source">Playlist to copy</label>
       <select id="source"><option value="">Connect an account first</option></select>
       <div class="targets" id="targets">
-        <label><input type="checkbox" value="spotify"> Spotify</label>
-        <label><input type="checkbox" value="youtube"> YouTube</label>
-        <label><input type="checkbox" value="apple"> Apple Music</label>
+        <label style="--tc:var(--spotify)"><input type="checkbox" value="spotify"> Spotify</label>
+        <label style="--tc:var(--youtube)"><input type="checkbox" value="youtube"> YouTube</label>
+        <label style="--tc:var(--apple)"><input type="checkbox" value="apple"> Apple Music</label>
+      </div>
+      <div class="thresh">
+        <label for="thresh">Match strictness</label>
+        <input type="range" id="thresh" min="50" max="95" step="1" value="62">
+        <output id="thresh-out" for="thresh">62%</output>
       </div>
     </div>
     <div class="actions">
       <button class="ghost" id="btn-preview" disabled>Find matches</button>
       <button id="btn-run" disabled>Copy tracks</button>
+    </div>
+    <div id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress">
+      <span class="txt" id="progress-text">Idle</span>
+      <span class="track"><span class="bar" id="progress-bar"></span></span>
     </div>
   </div>
 
@@ -164,7 +282,7 @@
   </div>
 
   <h2>Activity</h2>
-  <div id="log">ready.</div>
+  <div id="log" aria-label="Activity log"><div>ready.</div></div>
 
   <details class="setup">
     <summary>Setup and keys</summary>
@@ -216,7 +334,12 @@ const KEYS = {
 };
 
 const REDIRECT = location.origin + location.pathname;
-const state = { playlists: [], matches: null, source: null };
+const state = {
+  playlists: [], matches: null, source: null, targetList: [],
+  threshold: Math.min(0.95, Math.max(0.5, Number(store.get('pb.threshold') || 62) / 100)),
+  running: false, cancelled: false
+};
+const reducedMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 const $ = s => document.querySelector(s);
 function log(msg, isErr){
@@ -226,6 +349,42 @@ function log(msg, isErr){
   line.textContent = new Date().toLocaleTimeString() + '  ' + msg;
   el.appendChild(line);
   el.scrollTop = el.scrollHeight;
+}
+
+function logLink(msg, href, label){
+  const el = $('#log');
+  const line = document.createElement('div');
+  line.textContent = new Date().toLocaleTimeString() + '  ' + msg + ' ';
+  const a = document.createElement('a');
+  a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  a.textContent = label || href;
+  line.appendChild(a);
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function setProgress(done, total, label){
+  const pct = total ? Math.round(done / total * 100) : 0;
+  $('#progress-bar').style.width = pct + '%';
+  $('#progress').setAttribute('aria-valuenow', String(pct));
+  $('#progress-text').textContent = label ? `${label} ${done}/${total} · ${pct}%` : `${pct}%`;
+}
+function showProgress(){
+  $('#progress').classList.add('show');
+  $('#progress-bar').style.width = '0%';
+  $('#progress-text').textContent = 'Starting…';
+}
+function hideProgress(){ $('#progress').classList.remove('show'); }
+
+function countUp(el, to){
+  if (reducedMotion || !to){ el.textContent = to + '%'; return; }
+  const dur = 500, t0 = performance.now();
+  const step = t => {
+    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(to * e) + '%';
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 /* ---------------------------- matching ---------------------------- */
@@ -306,10 +465,30 @@ const spotify = {
     if (j.refresh_token) store.set('pb.sp.refresh', j.refresh_token);
   },
 
-  restore(){
+  async restore(){
     const t = store.get('pb.sp.token'), exp = Number(store.get('pb.sp.expires')||0);
     if (t && Date.now() < exp - 30000){ this.token = t; return true; }
-    return false;
+    // Token expired: try the refresh token once instead of forcing a new sign-in.
+    const refresh = store.get('pb.sp.refresh');
+    if (!refresh || !KEYS.spotifyClientId) return false;
+    try {
+      const r = await fetch('https://accounts.spotify.com/api/token', {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({
+          client_id: KEYS.spotifyClientId,
+          grant_type: 'refresh_token',
+          refresh_token: refresh
+        })
+      });
+      if (!r.ok) return false;
+      const j = await r.json();
+      this.token = j.access_token;
+      store.set('pb.sp.token', j.access_token);
+      store.set('pb.sp.expires', String(Date.now() + j.expires_in*1000));
+      if (j.refresh_token) store.set('pb.sp.refresh', j.refresh_token);
+      return true;
+    } catch(e){ return false; }
   },
 
   async api(path, opts={}){
@@ -632,95 +811,217 @@ function selectedTargets(){
   return [...document.querySelectorAll('#targets input:checked')].map(i => i.value);
 }
 
+function confClass(c){ return c >= 0.9 ? 'ok' : (c >= state.threshold ? 'fuzzy' : 'none'); }
+
+function resultCell(r, animate){
+  if (r === undefined) return '<td class="res pending">scanning…</td>';
+  if (r === null) return '<td class="res none">no match<span class="meter"><i style="--w:0%"></i></span></td>';
+  const cls = confClass(r.confidence);
+  const pct = Math.round(r.confidence * 100);
+  const pctTxt = `<span class="pct" data-pct="${pct}">${animate && !reducedMotion ? '0%' : pct + '%'}</span>`;
+  const label = cls === 'none'
+    ? `too weak (${pctTxt})`
+    : `${pctTxt} · ${escapeHtml(r.title)} — ${escapeHtml(r.artist)}`;
+  return `<td class="res ${cls}">${label}<span class="meter"><i style="--w:${pct}%"></i></span></td>`;
+}
+
+function buildTable(){
+  const host = $('#table-host');
+  const targets = state.targetList;
+  const tracks = state.matches.map(m => m.track);
+  if (!tracks.length){
+    host.innerHTML = '<div class="empty">Nothing matched yet. Choose a playlist and select where it should go.</div>';
+    return;
+  }
+  const rows = tracks.map((tr, i) =>
+    `<tr id="row-${i}"><td>${i+1}</td><td class="tt">${escapeHtml(tr.title)}<br><span>${escapeHtml(tr.artist)}</span></td>${
+      targets.map(() => '<td class="res pending">scanning…</td>').join('')
+    }</tr>`
+  ).join('');
+  host.innerHTML = `<table><thead><tr><th></th><th>Track</th>${
+    targets.map(t => `<th>${SERVICES[t].label}</th>`).join('')
+  }</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function fillRow(i, animate){
+  const row = document.getElementById('row-' + i);
+  const m = state.matches[i];
+  if (!row || !m || !m.results) return;
+  state.targetList.forEach((t, k) => {
+    const cell = row.children[2 + k];
+    if (!cell) return;
+    const probe = document.createElement('div');
+    probe.innerHTML = `<table><tbody><tr>${resultCell(m.results[t], animate)}</tr></tbody></table>`;
+    const fresh = probe.querySelector('td');
+    if (fresh) cell.replaceWith(fresh);
+  });
+  row.querySelectorAll('.pct').forEach(el => countUp(el, Number(el.dataset.pct)));
+}
+
+function markPendingSkipped(){
+  if (!state.matches) return;
+  state.matches.forEach((m, i) => {
+    if (m && m.results) return;
+    const row = document.getElementById('row-' + i);
+    if (!row) return;
+    row.querySelectorAll('td.pending').forEach(td => {
+      td.classList.remove('pending');
+      td.classList.add('none');
+      td.textContent = 'skipped';
+    });
+  });
+}
+
+function goodCount(){
+  if (!state.matches) return 0;
+  return state.matches.filter(m => m && m.results &&
+    state.targetList.some(t => m.results[t] && m.results[t].confidence >= state.threshold)).length;
+}
+
 function renderMatches(){
   const host = $('#table-host');
   if (!state.matches || !state.matches.length){
     host.innerHTML = '<div class="empty">Nothing matched yet. Choose a playlist and select where it should go.</div>';
     return;
   }
-  const targets = state.targetList;
-  const rows = state.matches.map((m,i) => {
-    const cells = targets.map(t => {
-      const r = m.results[t];
-      if (!r) return '<td class="res none">no match</td>';
-      const cls = r.confidence >= 0.9 ? 'ok' : (r.confidence >= 0.62 ? 'fuzzy' : 'none');
-      const label = cls === 'none'
-        ? 'too weak'
-        : `${Math.round(r.confidence*100)}% · ${r.title} — ${r.artist}`;
-      return `<td class="res ${cls}">${escapeHtml(label)}</td>`;
-    }).join('');
-    return `<tr><td>${i+1}</td><td>${escapeHtml(m.track.title)}<br><span style="color:var(--ink-soft)">${escapeHtml(m.track.artist)}</span></td>${cells}</tr>`;
-  }).join('');
-  host.innerHTML = `<table><thead><tr><th></th><th>Track</th>${
-    targets.map(t => `<th>${SERVICES[t].label}</th>`).join('')
-  }</tr></thead><tbody>${rows}</tbody></table>`;
+  buildTable();
+  state.matches.forEach((m, i) => { if (m && m.results) fillRow(i, false); });
 }
 
 function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 async function preview(){
-  const [svcKey, id] = $('#source').value.split('|');
+  if (state.running){
+    state.cancelled = true;
+    log('Stopping after the in-flight searches…');
+    return;
+  }
+  const value = $('#source').value;
+  if (!value){ log('Choose a playlist first.', true); return; }
+  const [svcKey, id] = value.split('|');
   const targets = selectedTargets().filter(t => t !== svcKey && SERVICES[t].token);
   if (!targets.length){ log('Pick at least one connected destination that is not the source.', true); return; }
 
   const meta = state.playlists.find(p => p.service === svcKey && p.id === id);
+  if (!meta){ log('That playlist is no longer listed — reconnect to refresh.', true); return; }
   state.source = { ...meta };
   state.targetList = targets;
 
-  $('#btn-preview').disabled = true; $('#btn-run').disabled = true;
-  log(`Reading "${meta.name}" from ${SERVICES[svcKey].label}…`);
+  state.running = true; state.cancelled = false;
+  const btnPrev = $('#btn-preview'), btnRun = $('#btn-run'), srcSel = $('#source');
+  btnPrev.classList.add('danger'); btnPrev.textContent = 'Stop';
+  btnRun.disabled = true; srcSel.disabled = true;
+  $('#table-host').setAttribute('aria-busy', 'true');
+  showProgress();
   try {
+    log(`Reading "${meta.name}" from ${SERVICES[svcKey].label}…`);
     const tracks = await SERVICES[svcKey].tracks(id);
+    if (!tracks.length){ log('That playlist has no playable tracks.', true); return; }
+    state.matches = tracks.map(track => ({ track, results: null }));
+    buildTable();
     log(`${tracks.length} tracks. Searching ${targets.map(t=>SERVICES[t].label).join(' and ')}…`);
-    const matches = [];
-    for (const track of tracks){
-      const results = {};
-      for (const t of targets){
-        try { results[t] = await SERVICES[t].find(track); }
-        catch(e){ results[t] = null; log(`${SERVICES[t].label} search failed for "${track.title}": ${e.message}`, true); }
+    let done = 0, next = 0;
+    setProgress(0, tracks.length, 'Matching');
+    const worker = async () => {
+      while (!state.cancelled){
+        const i = next++;
+        if (i >= tracks.length) return;
+        const results = {};
+        await Promise.all(targets.map(async t => {
+          try { results[t] = await SERVICES[t].find(tracks[i]); }
+          catch(e){ results[t] = null; log(`${SERVICES[t].label} search failed for "${tracks[i].title}": ${e.message}`, true); }
+        }));
+        if (state.cancelled) return;
+        state.matches[i].results = results;
+        fillRow(i, true);
+        done++; setProgress(done, tracks.length, 'Matching');
       }
-      matches.push({ track, results });
-      state.matches = matches;
-      renderMatches();
-    }
-    const good = matches.filter(m => targets.some(t => m.results[t] && m.results[t].confidence >= 0.62)).length;
-    log(`Done. ${good} of ${matches.length} tracks have a usable match.`);
-    $('#btn-run').disabled = good === 0;
+    };
+    await Promise.all(Array.from({ length: Math.min(4, tracks.length) }, worker));
+    markPendingSkipped();
+    const scanned = state.matches.filter(m => m.results).length;
+    const good = goodCount();
+    if (state.cancelled) log(`Stopped. ${scanned} of ${tracks.length} scanned, ${good} usable.`);
+    else log(`Done. ${good} of ${scanned} tracks have a usable match.`);
+    btnRun.disabled = good === 0;
   } catch(e){
     log(e.message, true);
   } finally {
-    $('#btn-preview').disabled = false;
+    state.running = false; state.cancelled = false;
+    btnPrev.classList.remove('danger'); btnPrev.textContent = 'Find matches';
+    btnPrev.disabled = !state.playlists.length;
+    btnRun.disabled = goodCount() === 0;
+    srcSel.disabled = false;
+    $('#table-host').removeAttribute('aria-busy');
+    hideProgress();
   }
 }
 
 async function run(){
-  if (!state.matches) return;
-  $('#btn-run').disabled = true;
+  if (!state.matches || state.running) return;
+  const jobs = [];
   for (const t of state.targetList){
-    const svc = SERVICES[t];
     const ids = state.matches
+      .filter(m => m && m.results)
       .map(m => m.results[t])
-      .filter(r => r && r.confidence >= 0.62)
+      .filter(r => r && r.confidence >= state.threshold)
       .map(r => r.id);
-    if (!ids.length){ log(`${svc.label}: nothing to add.`, true); continue; }
+    if (ids.length) jobs.push({ t, ids });
+  }
+  if (!jobs.length){ log('Nothing clears the strictness bar — lower it or re-run matching.', true); return; }
+
+  state.running = true;
+  const btnRun = $('#btn-run'), btnPrev = $('#btn-preview'), srcSel = $('#source');
+  btnRun.disabled = true; btnRun.classList.add('busy'); btnRun.textContent = 'Copying…';
+  btnPrev.disabled = true; srcSel.disabled = true;
+  showProgress();
+  const stepsOf = j => j.t === 'apple' ? 1 : (j.t === 'spotify' ? Math.ceil(j.ids.length / 100) : j.ids.length);
+  const total = jobs.reduce((n, j) => n + stepsOf(j), 0);
+  let step = 0;
+  setProgress(0, total, 'Copying');
+
+  for (const j of jobs){
+    const svc = SERVICES[j.t];
     try {
-      log(`${svc.label}: creating "${state.source.name}" with ${ids.length} tracks…`);
-      if (t === 'apple'){
-        await svc.createPlaylist(state.source.name, ids);
+      log(`${svc.label}: creating "${state.source.name}" with ${j.ids.length} tracks…`);
+      if (j.t === 'apple'){
+        await svc.createPlaylist(state.source.name, j.ids);
+        step++; setProgress(step, total, 'Copying');
+        log(`${svc.label}: done.`);
       } else {
         const pid = await svc.createPlaylist(state.source.name);
-        await svc.add(pid, ids);
+        if (j.t === 'spotify'){
+          for (let i = 0; i < j.ids.length; i += 100){
+            await svc.add(pid, j.ids.slice(i, i + 100));
+            step++; setProgress(step, total, 'Copying');
+          }
+        } else {
+          for (const vid of j.ids){
+            await svc.add(pid, [vid]);
+            step++; setProgress(step, total, 'Copying');
+          }
+        }
+        const href = j.t === 'spotify'
+          ? 'https://open.spotify.com/playlist/' + pid
+          : 'https://www.youtube.com/playlist?list=' + pid;
+        logLink(`${svc.label}: done.`, href, 'Open the new playlist');
       }
-      log(`${svc.label}: done.`);
     } catch(e){ log(`${svc.label}: ${e.message}`, true); }
   }
-  $('#btn-run').disabled = false;
+  log('Copy finished.');
+  state.running = false;
+  btnRun.classList.remove('busy'); btnRun.textContent = 'Copy tracks';
+  btnPrev.disabled = false; srcSel.disabled = false;
+  btnRun.disabled = goodCount() === 0;
+  hideProgress();
 }
 
 /* ----------------------------- wiring ----------------------------- */
 
 async function connect(key){
-  const svc = SERVICES[key];
+  const svc = SERVICES[key], btn = $('#btn-' + key);
+  const label = btn.textContent;
+  btn.disabled = true; btn.classList.add('busy'); btn.textContent = 'Connecting…';
   try {
     await svc.connect();
     if (key !== 'spotify'){                 // spotify returns via redirect
@@ -728,6 +1029,10 @@ async function connect(key){
       await loadPlaylists(key);
     }
   } catch(e){ log(e.message, true); }
+  finally {
+    btn.disabled = false; btn.classList.remove('busy');
+    if (btn.textContent === 'Connecting…') btn.textContent = label;
+  }
 }
 
 ['spotify','youtube','apple'].forEach(k => {
@@ -736,6 +1041,57 @@ async function connect(key){
 $('#btn-preview').addEventListener('click', preview);
 $('#btn-run').addEventListener('click', run);
 $('#source').addEventListener('change', () => { state.matches = null; renderMatches(); $('#btn-run').disabled = true; });
+
+/* destination chips: visual state + persistence */
+document.querySelectorAll('#targets input').forEach(inp => {
+  const sync = () => inp.closest('label').classList.toggle('on', inp.checked);
+  inp.addEventListener('change', () => {
+    sync();
+    try { store.set('pb.targets', JSON.stringify(selectedTargets())); } catch(e){}
+  });
+  sync();
+});
+try {
+  (JSON.parse(store.get('pb.targets') || '[]') || []).forEach(v => {
+    const inp = document.querySelector('#targets input[value="' + v + '"]');
+    if (inp){ inp.checked = true; inp.closest('label').classList.add('on'); }
+  });
+} catch(e){}
+
+/* strictness slider */
+const threshEl = $('#thresh'), threshOut = $('#thresh-out');
+threshEl.value = String(Math.round(state.threshold * 100));
+threshOut.textContent = Math.round(state.threshold * 100) + '%';
+threshEl.addEventListener('input', () => {
+  state.threshold = Number(threshEl.value) / 100;
+  threshOut.textContent = threshEl.value + '%';
+  try { store.set('pb.threshold', String(state.threshold)); } catch(e){}
+  if (state.matches && state.matches.some(m => m && m.results)){
+    renderMatches();
+    $('#btn-run').disabled = state.running || goodCount() === 0;
+  }
+});
+
+/* scroll reveals */
+const revealables = document.querySelectorAll('h2, .channels, .route, #table-host, #log, details.setup');
+if ('IntersectionObserver' in window){
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  revealables.forEach(el => { el.classList.add('reveal'); io.observe(el); });
+} else {
+  revealables.forEach(el => el.classList.add('in', 'reveal'));
+}
+
+/* Ctrl/Cmd + Enter = find matches */
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !state.running && !$('#btn-preview').disabled){
+    e.preventDefault();
+    $('#btn-preview').click();
+  }
+});
 
 $('#btn-save').addEventListener('click', () => {
   KEYS.spotifyClientId = $('#k-spotify').value.trim();
@@ -767,11 +1123,16 @@ $('#btn-save').addEventListener('click', () => {
 
   for (const key of ['spotify','youtube']){
     const svc = SERVICES[key];
-    if (svc.token || svc.restore()){
+    const hadToken = !!store.get(key === 'spotify' ? 'pb.sp.token' : 'pb.yt.token');
+    let ok = false;
+    try { ok = !!svc.token || await svc.restore(); } catch(e){ ok = false; }
+    if (ok){
       try {
         setConnected(key, await svc.me(), true);
         await loadPlaylists(key);
       } catch(e){ log(e.message, true); setConnected(key, '', false); }
+    } else if (hadToken){
+      log(svc.label + ' session expired — connect again.', true);
     }
   }
 })();
